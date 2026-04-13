@@ -56,7 +56,10 @@ export function useAccounts() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `gibikey-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const timestamp = `${pad(now.getHours())}_${pad(now.getDate())}_${pad(now.getMonth() + 1)}_${now.getFullYear()}`;
+    a.download = `passman_${timestamp}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }, [accounts]);

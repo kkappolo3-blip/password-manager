@@ -8,8 +8,9 @@ import AddAccountDialog from "@/components/AddAccountDialog";
 import logo from "@/assets/logo.png";
 
 export default function Index() {
-  const { accounts, allCount, search, setSearch, addAccount, deleteAccount, exportAccounts, importAccounts } = useAccounts();
+  const { accounts, allCount, search, setSearch, addAccount, deleteAccount, updateAccount, exportAccounts, importAccounts } = useAccounts();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<import("@/hooks/useAccounts").Account | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,7 +121,7 @@ export default function Index() {
           <div className="grid gap-3">
             <AnimatePresence mode="popLayout">
               {accounts.map((acc) => (
-                <AccountCard key={acc.id} account={acc} onDelete={deleteAccount} />
+                <AccountCard key={acc.id} account={acc} onDelete={deleteAccount} onEdit={(a) => { setEditingAccount(a); setDialogOpen(true); }} />
               ))}
             </AnimatePresence>
           </div>
@@ -130,7 +131,7 @@ export default function Index() {
       {/* FAB */}
       <motion.button
         whileTap={{ scale: 0.9 }}
-        onClick={() => setDialogOpen(true)}
+        onClick={() => { setEditingAccount(null); setDialogOpen(true); }}
         className="fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-surface-dark text-surface-dark-foreground shadow-xl flex items-center justify-center z-40"
       >
         <Plus size={26} strokeWidth={3} />
@@ -138,8 +139,10 @@ export default function Index() {
 
       <AddAccountDialog
         open={dialogOpen}
-        onClose={() => setDialogOpen(false)}
+        onClose={() => { setDialogOpen(false); setEditingAccount(null); }}
         onAdd={addAccount}
+        editAccount={editingAccount}
+        onUpdate={updateAccount}
       />
 
       <p className="text-center text-[10px] text-muted-foreground mt-10 font-semibold">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, Copy, Trash2, User, Lock, StickyNote, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { Eye, EyeOff, Copy, Trash2, Pencil, User, Lock, StickyNote, Link as LinkIcon, ExternalLink } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import type { Account } from "@/hooks/useAccounts";
@@ -7,6 +7,7 @@ import type { Account } from "@/hooks/useAccounts";
 interface Props {
   account: Account;
   onDelete: (id: string) => void;
+  onEdit: (account: Account) => void;
 }
 
 const platformColors: Record<string, string> = {
@@ -36,7 +37,7 @@ function getDomain(url: string): string {
   }
 }
 
-export default function AccountCard({ account, onDelete }: Props) {
+export default function AccountCard({ account, onDelete, onEdit }: Props) {
   const [showPw, setShowPw] = useState(false);
 
   const copyToClipboard = (text: string, label: string) => {
@@ -57,12 +58,20 @@ export default function AccountCard({ account, onDelete }: Props) {
         <span className="text-sm font-bold text-card tracking-wide uppercase truncate">
           {account.platform}
         </span>
-        <button
-          onClick={() => onDelete(account.id)}
-          className="text-card/70 hover:text-card transition-colors"
-        >
-          <Trash2 size={16} />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => onEdit(account)}
+            className="text-card/70 hover:text-card transition-colors"
+          >
+            <Pencil size={15} />
+          </button>
+          <button
+            onClick={() => onDelete(account.id)}
+            className="text-card/70 hover:text-card transition-colors"
+          >
+            <Trash2 size={15} />
+          </button>
+        </div>
       </div>
 
       {/* Body */}
