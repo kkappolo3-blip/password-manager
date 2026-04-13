@@ -3,10 +3,12 @@ import { useState, useEffect, useCallback } from "react";
 export interface Account {
   id: string;
   platform: string;
+  subtitle?: string;
   username: string;
   password: string;
   url?: string;
   notes?: string;
+  image?: string;
   createdAt: number;
 }
 
@@ -23,6 +25,12 @@ function loadAccounts(): Account[] {
 
 function saveAccounts(accounts: Account[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+}
+
+function getBackupFilename(): string {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `passman_${pad(now.getHours())}_${pad(now.getDate())}_${pad(now.getMonth() + 1)}_${now.getFullYear()}.json`;
 }
 
 export function useAccounts() {
@@ -50,16 +58,31 @@ export function useAccounts() {
     );
   }, []);
 
-  const exportAccounts = useCallback(() => {
+  const exportAccounts = useCallback(async () => {
     const json = JSON.stringify(accounts, null, 2);
     const blob = new Blob([json], { type: "application/json" });
+    const file = new File([blob], getBackupFilename(), { type: "application/json" });
+
+    // Try Web Share API first (Android native share sheet)
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: "Gibikey Studio Backup",
+          text: "Backup akun Gibikey Studio",
+          files: [file],
+        });
+        return;
+      } catch (err: any) {
+        if (err.name === "AbortError") return;
+        // Fallback to download
+      }
+    }
+
+    // Fallback: direct download
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    const now = new Date();
-    const pad = (n: number) => String(n).padStart(2, "0");
-    const timestamp = `${pad(now.getHours())}_${pad(now.getDate())}_${pad(now.getMonth() + 1)}_${now.getFullYear()}`;
-    a.download = `passman_${timestamp}.json`;
+    a.download = getBackupFilename();
     a.click();
     URL.revokeObjectURL(url);
   }, [accounts]);
@@ -77,10 +100,12 @@ export function useAccounts() {
           const imported = valid.map((item: any) => ({
             id: item.id || crypto.randomUUID(),
             platform: item.platform,
+            subtitle: item.subtitle || "",
             username: item.username || "",
             password: item.password || "",
             url: item.url || "",
             notes: item.notes || "",
+            image: item.image || "",
             createdAt: item.createdAt || Date.now(),
           }));
           setAccounts((prev) => {
@@ -101,7 +126,8 @@ export function useAccounts() {
   const filtered = accounts.filter(
     (a) =>
       a.platform.toLowerCase().includes(search.toLowerCase()) ||
-      a.username.toLowerCase().includes(search.toLowerCase())
+      a.username.toLowerCase().includes(search.toLowerCase()) ||
+      (a.subtitle || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return { accounts: filtered, allAccounts: accounts, allCount: accounts.length, search, setSearch, addAccount, deleteAccount, updateAccount, exportAccounts, importAccounts };

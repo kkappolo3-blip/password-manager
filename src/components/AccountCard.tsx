@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye, EyeOff, Copy, Trash2, Pencil, User, Lock, StickyNote, Link as LinkIcon, ExternalLink } from "lucide-react";
+import { Eye, EyeOff, Copy, Trash2, Pencil, User, Lock, StickyNote, Link as LinkIcon, ExternalLink, ImageIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import type { Account } from "@/hooks/useAccounts";
@@ -53,122 +53,116 @@ export default function AccountCard({ account, onDelete, onEdit }: Props) {
       exit={{ opacity: 0, y: -20 }}
       className="bg-card rounded-2xl shadow-md border border-border overflow-hidden"
     >
+      {/* Image */}
+      {account.image && (
+        <img
+          src={account.image}
+          alt={account.platform}
+          className="w-full h-28 object-cover"
+          loading="lazy"
+        />
+      )}
+
       {/* Header */}
-      <div className={`${getPlatformColor(account.platform)} px-4 py-2.5 flex items-center justify-between`}>
-        <span className="text-sm font-bold text-card tracking-wide uppercase truncate">
-          {account.platform}
-        </span>
-        <div className="flex items-center gap-1">
+      <div className={`${getPlatformColor(account.platform)} px-3 py-2 flex items-center justify-between`}>
+        <div className="truncate flex-1 mr-2">
+          <span className="text-xs font-bold text-card tracking-wide uppercase truncate block">
+            {account.platform}
+          </span>
+          {account.subtitle && (
+            <span className="text-[10px] text-card/70 truncate block leading-tight">
+              {account.subtitle}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => onEdit(account)}
-            className="text-card/70 hover:text-card transition-colors"
+            className="text-card/70 hover:text-card transition-colors p-0.5"
           >
-            <Pencil size={15} />
+            <Pencil size={13} />
           </button>
           <button
             onClick={() => onDelete(account.id)}
-            className="text-card/70 hover:text-card transition-colors"
+            className="text-card/70 hover:text-card transition-colors p-0.5"
           >
-            <Trash2 size={15} />
+            <Trash2 size={13} />
           </button>
         </div>
       </div>
 
       {/* Body */}
-      <div className="p-4 space-y-3">
+      <div className="p-3 space-y-2">
         {/* Username */}
         {account.username && (
-          <div className="flex items-center gap-2">
-            <User size={16} className="text-muted-foreground shrink-0" />
-            <span className="text-sm font-semibold truncate flex-1">{account.username}</span>
+          <div className="flex items-center gap-1.5">
+            <User size={13} className="text-muted-foreground shrink-0" />
+            <span className="text-xs font-semibold truncate flex-1">{account.username}</span>
             <button
               onClick={() => copyToClipboard(account.username, "Username")}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              <Copy size={14} />
+              <Copy size={12} />
             </button>
           </div>
         )}
 
         {/* Password */}
         {account.password && (
-          <div className="flex items-center gap-2">
-            <Lock size={16} className="text-muted-foreground shrink-0" />
-            <span className="text-sm font-mono flex-1 truncate">
+          <div className="flex items-center gap-1.5">
+            <Lock size={13} className="text-muted-foreground shrink-0" />
+            <span className="text-[11px] font-mono flex-1 truncate">
               {showPw ? account.password : "••••••••"}
             </span>
             <button
               onClick={() => setShowPw(!showPw)}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              {showPw ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showPw ? <EyeOff size={12} /> : <Eye size={12} />}
             </button>
             <button
               onClick={() => copyToClipboard(account.password, "Password")}
               className="text-muted-foreground hover:text-primary transition-colors"
             >
-              <Copy size={14} />
+              <Copy size={12} />
             </button>
           </div>
         )}
 
-        {/* URL with preview */}
+        {/* URL */}
         {account.url && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <LinkIcon size={16} className="text-muted-foreground shrink-0" />
-              <a
-                href={account.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm font-semibold text-primary truncate flex-1 hover:underline"
-              >
-                {getDomain(account.url)}
-              </a>
-              <a
-                href={account.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
-              >
-                <ExternalLink size={14} />
-              </a>
-            </div>
-            {/* Link Preview */}
+          <div className="flex items-center gap-1.5">
+            <LinkIcon size={13} className="text-muted-foreground shrink-0" />
             <a
               href={account.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-xl overflow-hidden border border-border bg-secondary hover:opacity-90 transition-opacity"
+              className="text-xs font-semibold text-primary truncate flex-1 hover:underline"
             >
-              <img
-                src={`https://api.microlink.io/?url=${encodeURIComponent(account.url)}&screenshot=true&meta=false&embed=screenshot.url`}
-                alt={`Preview ${getDomain(account.url)}`}
-                className="w-full h-32 object-cover object-top"
-                loading="lazy"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).style.display = "none";
-                }}
-              />
-              <div className="px-3 py-2">
-                <p className="text-xs font-bold text-foreground truncate">{getDomain(account.url)}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{account.url}</p>
-              </div>
+              {getDomain(account.url)}
+            </a>
+            <a
+              href={account.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              <ExternalLink size={12} />
             </a>
           </div>
         )}
 
         {/* Notes */}
         {account.notes && (
-          <div className="flex items-start gap-2 pt-1 border-t border-border">
-            <StickyNote size={14} className="text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-xs text-muted-foreground leading-relaxed">{account.notes}</p>
+          <div className="flex items-start gap-1.5 pt-1 border-t border-border">
+            <StickyNote size={12} className="text-muted-foreground shrink-0 mt-0.5" />
+            <p className="text-[10px] text-muted-foreground leading-relaxed line-clamp-2">{account.notes}</p>
           </div>
         )}
 
         {/* Empty state */}
-        {!account.username && !account.password && !account.url && !account.notes && (
-          <p className="text-xs text-muted-foreground italic">Tidak ada detail</p>
+        {!account.username && !account.password && !account.url && !account.notes && !account.image && (
+          <p className="text-[10px] text-muted-foreground italic">Tidak ada detail</p>
         )}
       </div>
     </motion.div>
