@@ -25,13 +25,9 @@ export function useAccounts() {
   const [loading, setLoading] = useState(true);
 
   const fetchAccounts = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { setAccounts([]); setLoading(false); return; }
-
     const { data, error } = await supabase
       .from("accounts")
       .select("*")
-      .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (!error && data) {
@@ -52,19 +48,10 @@ export function useAccounts() {
 
   useEffect(() => {
     fetchAccounts();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      fetchAccounts();
-    });
-    return () => subscription.unsubscribe();
   }, [fetchAccounts]);
 
   const addAccount = useCallback(async (data: Omit<Account, "id" | "createdAt">) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
     const { error } = await supabase.from("accounts").insert({
-      user_id: user.id,
       platform: data.platform,
       subtitle: data.subtitle || null,
       username: data.username,
@@ -119,9 +106,6 @@ export function useAccounts() {
   }, [accounts]);
 
   const importAccounts = useCallback(async (file: File) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error("Harus login dulu");
-
     return new Promise<number>((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = async (e) => {
@@ -131,7 +115,6 @@ export function useAccounts() {
           const valid = data.filter((item: any) => item.platform && typeof item.platform === "string");
 
           const rows = valid.map((item: any) => ({
-            user_id: user.id,
             platform: item.platform,
             subtitle: item.subtitle || null,
             username: item.username || "",
