@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Plus, Search, ShieldCheck, KeyRound, Download, Upload } from "lucide-react";
+import { Plus, Search, ShieldCheck, KeyRound, Download, Upload, Lock } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import { useAccounts } from "@/hooks/useAccounts";
@@ -8,7 +8,11 @@ import AccountCard from "@/components/AccountCard";
 import AddAccountDialog from "@/components/AddAccountDialog";
 import logo from "@/assets/logo.png";
 
-export default function Index() {
+interface IndexProps {
+  onLock?: () => void;
+}
+
+export default function Index({ onLock }: IndexProps) {
   const { accounts, allCount, search, setSearch, addAccount, deleteAccount, updateAccount, exportAccounts, importAccounts, loading } = useAccounts();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
@@ -59,6 +63,15 @@ export default function Index() {
               >
                 <Download size={18} />
               </button>
+              {onLock && (
+                <button
+                  onClick={onLock}
+                  className="w-9 h-9 rounded-xl bg-primary-foreground/10 flex items-center justify-center text-primary-foreground hover:bg-primary-foreground/20 transition-colors active:scale-95"
+                  title="Kunci"
+                >
+                  <Lock size={18} />
+                </button>
+              )}
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="w-9 h-9 rounded-xl bg-primary-foreground/10 flex items-center justify-center text-primary-foreground hover:bg-primary-foreground/20 transition-colors active:scale-95"
