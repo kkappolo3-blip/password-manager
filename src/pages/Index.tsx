@@ -63,6 +63,15 @@ export default function Index({ onLock }: IndexProps) {
               >
                 <Download size={18} />
               </button>
+              {onLock && (
+                <button
+                  onClick={onLock}
+                  className="w-9 h-9 rounded-xl bg-primary-foreground/10 flex items-center justify-center text-primary-foreground hover:bg-primary-foreground/20 transition-colors active:scale-95"
+                  title="Kunci"
+                >
+                  <Lock size={18} />
+                </button>
+              )}
               <button
                 onClick={() => fileInputRef.current?.click()}
                 className="w-9 h-9 rounded-xl bg-primary-foreground/10 flex items-center justify-center text-primary-foreground hover:bg-primary-foreground/20 transition-colors active:scale-95"
